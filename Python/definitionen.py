@@ -72,9 +72,9 @@ class Zelle:
     
     def zaehle(self, radius):
         self.counter = 0
-        r = radius+1
-        for s in range((-1)*r, r):
-            for z in range((-1)*r, r):
+        r = radius
+        for s in range((-1)*r, r+1):
+            for z in range((-1)*r, r+1):
                 if not(self.in_range(s,z)):
                     break
                 temp = self.nachbar(z,s)

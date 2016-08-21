@@ -6,8 +6,13 @@ Created on Tue Aug 16 16:50:50 2016
 """
 # Alle Angaben im Grid werden in der Reihenfolge Zeile|Spalte durchgeführt
 
+#%%
+#===========================Imports und Generelles=============================
+#
+#%%
+
 import random as rd
-import math as m
+import numpy as np
 
 
 max_wert = 10 # globale Angabe wie hoch der Betrag der Wert
@@ -22,6 +27,10 @@ def randact(chance):
         return False
     return True
 
+
+#%%
+#=============================neue Klasse======================================
+#
 #%%
 
 class Grid:
@@ -31,17 +40,14 @@ class Grid:
             Stellt die Grundstruktur zur Erzeugung der Patterns"""
         self.zeilenlaenge = zeilenlaenge
         self.spaltenlaenge = spaltenlaenge
-        self.grid = []     # Zeile | Spalte
+        self.grid = np.ndarray((zeilenlaenge, spaltenlaenge), \
+                                dtype = np.object)
         
         for z in range(zeilenlaenge):
-            zeile = []
-            
             for s in range(spaltenlaenge):
-                zeile.append(Zelle(self, z, s, rd.randint(-1, 1), \
-                                   randact(chance)))
+                self.grid[z][s] = Zelle(self, z, s, rd.randint(-1, 1), \
+                                        randact(chance))
                 
-            self.grid.append(zeile)
-            
     
     def print_grid(self):
         """ void -> void
@@ -89,6 +95,42 @@ class Grid:
             for s in range(self.spaltenlaenge): 
                 self.grid[z][s].zaehle2(ri, ra)
                 
+    def scan3(self, ai, bi, aa, ba):
+        """ int ai, int bi, int aa, int ba -> void
+            lässt jede Zelle nach Aktivatoren/Inhibitoren in 
+            ihrer Umgebung zählen
+            Zu beachten: ai <= aa & bi <= ba """
+        for z in range(self.zeilenlaenge):
+            for s in range(self.spaltenlaenge): 
+                self.grid[z][s].zaehle3(ai, bi, aa, ba)
+                
+    def scan4(self, ai, bi, aa, ba, ausrichtung):
+        """ int ai, int bi, int aa, int ba, int ausrichtung -> void
+            lässt jede Zelle nach Aktivatoren/Inhibitoren in 
+            ihrer Umgebung zählen
+            
+            Zu beachten: ai <= aa & bi <= ba 
+
+            Wahl der Ausrichtung: 1 => Hälfte zeigt nach oben        
+                                  2 => Hälfte zeigt nach rechts
+                                  3 => Hälfte zeigt nach unten
+                                  4 => Hälfte zeigt nach links"""
+
+        for z in range(self.zeilenlaenge):
+            for s in range(self.spaltenlaenge): 
+                self.grid[z][s].zaehle_async_halb(ai, bi, aa, ba, ausrichtung)
+                
+                
+    def scan5(self, ai, bi, wi, aa, ba, wa):
+        """ int ai, int bi, int wi, int aa, int ba, int wa -> void
+            lässt jede Zelle nach Aktivatoren/Inhibitoren in 
+            ihrer Umgebung zählen
+            Zu beachten: ai <= aa & bi <= ba """
+        for z in range(self.zeilenlaenge):
+            for s in range(self.spaltenlaenge): 
+                self.grid[z][s].zaehle_async_twist(ai, bi, wi, aa, ba, wa)
+                
+                
     def write(self):
         """ void -> void
             Verändert alle Zellen basierend auf ihrem letzten Scan"""
@@ -105,6 +147,9 @@ class Grid:
             
        
 
+#%%
+#=============================neue Klasse======================================
+#
 #%%
         
 class Zelle:
@@ -141,7 +186,8 @@ class Zelle:
         self.zeile + zeile < 0:
             return False
         return True
-        
+
+#%%
     
     def zaehle(self, radius):
         """ int radius -> void
@@ -167,26 +213,241 @@ class Zelle:
     def zaehle2(self, ri, ra):
         """ int ri, int ra -> void
             updated den derzeitigen Stand der umliegenden Aktivatoren 
-            basierend auf der Interpretation von Young; Mit einem inneren 
+            basierend auf der Interpretation von Young; mit einem inneren 
             Radius für Aktivatoren und einem äußeren für Inhibitoren"""
         self.counter = 0
         for z in range((-1)*ra, ra+1):
             for s in range((-1)*ra, ra+1):
                 
-                if self.in_range(z,s) and m.sqrt(abs(z)**2 + abs(s)**2) <= ra:
+                if self.in_range(z,s) and (z**2 + s**2 <= ra**2):
                     temp = self.nachbar(z,s)
                     
                     #print "Betrachte: ", temp.zeile, temp.spalte, \
                     #      " Aktiv: ", temp.activator
                     
-                    if temp.activator and m.sqrt(abs(z)**2 + abs(s)**2) > ri:
+                    if temp.activator and (z**2 + s**2 > ri**2):
                         self.counter -=1
                         #print "-"
-                        
-                    elif temp.activator and m.sqrt(abs(z)**2 + abs(s)**2) <= ri:
+                    elif temp.activator and (z**2 + s**2 <= ri**2):
                         self.counter +=1     
                         #print "+"
+                        
+                        
+    def zaehle3(self, ai, bi, aa, ba):
+        """ int ai, int bi, int aa, int ba -> void
+        
+            Zu beachten: ai <= aa & bi <= ba 
+            Wobei ein "echt weniger" bevorzugt ist, weil das Bild sonst einfach 
+            einfarbig wird
+            
+            updated den derzeitigen Stand der umliegenden Aktivatoren 
+            basierend auf der Interpretation von Young; bei der eine Ellipse
+            der Berechnung zu Grunde liegt. 
+            
+            ai und bi sind die Hauptachsen der inneren Ellipse und aa und ba 
+            sind die Hauptachsen der äußeren Ellipse
+            ai und aa liegen dabei auf der Horizontalen und bi und ba auf der
+            Vertikalen.
+            Berechnungen gehen von der Formel (x/a)²+(y/b)²=1 aus.
+            """
+
+        self.counter = 0
+        for y in range((-1)*ba, ba+1):        # y ist hierbei die Zeile
+            for x in range((-1)*aa, aa+1):    # x ist hierbei die Spalte
+            
+                if self.in_range(y,x) and ((x/aa)**2 + (y/ba)**2 <= 1):
+                    temp = self.nachbar(y,x)
                     
+                    inside = ((x/ai)**2 + (y/bi)**2 <= 1) # true wenn sich
+                    # (x|y) innerhalb der Innenllipse befindet
+                    
+                    if temp.activator and not inside:
+                        self.counter -=1
+                        
+                    elif temp.activator and inside:
+                        self.counter +=1
+                        
+#%%
+                        
+    def zaehle_async_halb(self, ai, bi, aa, ba, ausrichtung):
+        """ int ai, int bi, int aa, int ba, int ausrichtung -> void
+
+            Wahl der Ausrichtung: 1 => Hälfte zeigt nach oben        
+                                  2 => Hälfte zeigt nach rechts
+                                  3 => Hälfte zeigt nach unten
+                                  4 => Hälfte zeigt nach links
+            
+            Zu beachten: ai <= aa & bi <= ba 
+            Wobei ein "echt weniger" bevorzugt ist, weil das Bild sonst einfach 
+            einfarbig wird
+            
+            updated den derzeitigen Stand der umliegenden Aktivatoren 
+            basierend auf der Interpretation von Young; bei der eine halbe
+            Ellipse der Berechnung zu Grunde liegt. 
+            
+            ai und bi sind die Hauptachsen der inneren Ellipse und aa und ba 
+            sind die Hauptachsen der äußeren Ellipse
+            ai und aa liegen dabei auf der Horizontalen und bi und ba auf der
+            Vertikalen.
+            Berechnungen gehen von der Formel (x/a)²+(y/b)²=1 aus.
+            """
+        if ausrichtung == 1:
+            b1 = (-1)*aa
+            b2 = aa+1
+            h1 = (-1)*ba
+            h2 = 1
+            
+        if ausrichtung == 2:
+            b1 = 0
+            b2 = aa+1
+            h1 = (-1)*ba
+            h2 = ba+1
+    
+        if ausrichtung == 3:
+            b1 = (-1)*aa
+            b2 = aa+1
+            h1 = 0
+            h2 = ba+1        
+        
+        if ausrichtung == 4:
+            b1 = (-1)*aa
+            b2 = 1
+            h1 = (-1)*ba
+            h2 = ba+1
+            
+        self.counter = 0
+        for y in range(h1, h2):        # y ist hierbei die Zeile
+            for x in range(b1, b2):    # x ist hierbei die Spalte
+            
+                if self.in_range(y,x) and ((x/aa)**2 + (y/ba)**2 <= 1):
+                    temp = self.nachbar(y,x)
+                    
+                    inside = ((x/ai)**2 + (y/bi)**2 <= 1) # true wenn sich
+                    # (x|y) innerhalb der Innenllipse befindet
+                    
+                    if temp.activator and not inside:
+                        self.counter -=1
+                        
+                    elif temp.activator and inside:
+                        self.counter +=1
+        
+#%%          
+
+    def zaehle_async_twist(self, ai, bi, wi, aa, ba, wa):
+        """ int ai, int bi, int wi, int aa, int ba, int wa -> void
+
+            wi und wa sind die Größen der Winkel, um den die jeweilige 
+            Ellipse gegen den Uhrzeigersinn rotiert wurde. wa und wi sind im
+            Gradmaß anzugeben
+            
+            Zu beachten: ai <= aa & bi <= ba 
+            Wobei ein "echt weniger" bevorzugt ist, weil das Bild sonst einfach 
+            einfarbig wird. 
+            
+            updated den derzeitigen Stand der umliegenden Aktivatoren 
+            basierend auf der Interpretation von Young; bei der eine halbe
+            Ellipse der Berechnung zu Grunde liegt. 
+            
+            ai und bi sind die Hauptachsen der inneren Ellipse und aa und ba 
+            sind die Hauptachsen der äußeren Ellipse
+            ai und aa liegen dabei auf der Horizontalen und bi und ba auf der
+            Vertikalen.
+            Berechnungen gehen von der Formel (x/a)²+(y/b)²=1 aus.
+            """
+        
+        # Zunächst muss eine Box um die Ellipse zum Iterieren gefunden werden
+        
+        beta = 180 - wa # Winkel zwischen Tangente und rotierter x-Achse
+        alpha = 90 - wa # Winkel zwischen rotierter Hauptachse und y-Achse       
+        beta = np.radians(beta)
+        alpha = np.radians(alpha)
+        
+        tanbeta =  np.tan(beta)        
+        
+        x0 = (aa**2 * tanbeta)/np.sqrt(ba**2 + aa**2 * tanbeta**2)  
+        # steigung der Tangente und beta sind gleichgesetzt 
+        # und dann nach x0 umgestellt
+        print "x0: ", x0
+            
+        wurzel = np.sqrt(1-(x0/aa)**2) # für Perfomance herausgezogen
+        print "wurzel: ", wurzel
+
+        f1 = ba*wurzel # Ellipsengleichung nach y umgestellt
+                       # dabei handelt es sich um die Obere Hälfte
+        print "f1: ", f1
+        
+        f2 = -ba*x0/(aa**2 * wurzel) # Ableitung erster Ordnung von f
+        print "f2: ", f2
+
+        xr= (f2*x0-f1)/f2 # Tangentengleichung (taylorraihe bis zur linearen 
+                          # Ordnung) mit 0 gleichgesetzt und nach x umgestellt
+        print "xr: ", xr
+
+        h = xr*np.sin(alpha) # h ist der höchste Punkt der gedrehten Ellipse
+                          # Berechnet mit Hilfe der entstehenden 
+                          # rechtwinkligen Dreiecke zwischen den Achsen
+        print "h: ", h
+        h = int(round(h)) # Wert wird zum nächsten Integer gerundet für die
+                          # nachfolgende range-function
+        print "h: ", h
+        
+        # Jetzt analog für die maximale breite
+        x0 = (aa**2 * tanbeta)/np.sqrt(ba**2 + aa**2 * tanbeta**2)         
+#        x0 = aa/np.sqrt((ba/(aa*np.tan(alpha)))**2 + 1)
+        print "\nx0: ", x0        
+        
+        wurzel = np.sqrt(1-(x0/aa)**2)
+        print "wurzel: ", wurzel
+        
+        f1 = ba*wurzel
+        print "f1: ", f1
+
+        f2 = -ba*x0/(aa**2 * wurzel)
+        print "f2: ", f2
+
+        xr = (f2*x0-f1)/f2
+        print "xr: ", xr
+
+        b = xr*np.cos(alpha)
+        print "b: ", b
+
+        b = int(round(b))
+        print "b: ", b
+
+        
+        self.counter = 0
+        
+        sinwa = np.sin(np.rad2deg(wa))
+        coswa = np.cos(np.rad2deg(wa))
+
+        sinwi = np.sin(np.rad2deg(wi))
+        coswi = np.cos(np.rad2deg(wi))
+        
+        for y in range(-h, h+1):        # y ist hierbei die Zeile
+            for x in range(-b, b+1):    # x ist hierbei die Spalte
+            
+                if self.in_range(y,x):
+                    
+                    aussen = (((x*coswa-y*sinwa)/aa)**2 + \
+                             ((x*sinwa + y*coswa)/ba)**2) <= 1
+                             
+                    innen = (((x*coswi-y*sinwi)/ai)**2 + \
+                            ((x*sinwi + y*coswi)/bi)**2) <= 1
+                    
+                    if aussen and not innen:
+                        if self.nachbar(y,x).activator:
+                            self.counter -= 1
+                    
+                    elif innen:
+                        if self.nachbar(y,x).activator:
+                            self.counter += 1
+        
+#%%  
+        
+#    def zaehle_async_opp(self, ar, br, al, bl):
+
+#%%        
+                
                     
     def max_update(self):
         """ int radius -> void
@@ -215,20 +476,23 @@ class Zelle:
     
     
     
-#%% 
+#%%
+#=============================Main (Test)======================================
+#
+#%%
     
 if __name__ == "__main__":
     """Autmomatisierter Aufruf der Klassen. Vergleiche mit Java 'main'"""
-    g = Grid(7,10)
+    g = Grid(7, 10, 12)
     g.print_grid2()
     print("\n")
    
-    for i in range(20):
-        g.scan2(2, 3)
-        #g.parallel_scan()
-        
-        g.write2()
-        #g.parallel_write()        
-        
-        g.print_grid2()
-        print("\n")
+#    for i in range(20):
+#        g.scan4(2, 1, 5, 3, 1)
+#        #g.parallel_scan()
+#        
+#        g.write2()
+#        #g.parallel_write()        
+#        
+#        g.print_grid2()
+#        print("\n")

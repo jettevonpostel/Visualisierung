@@ -26,6 +26,21 @@ def randact(chance):
     if rd.randint(1, chance) != 1:
         return False
     return True
+    
+def runde(x):
+    """float x -> int x
+       rundet die Kommazahle auf die betraglich weitest außen
+       liegende Stelle vom Ursprung aus gesehen"""
+    return int(round(x))
+
+#    if x == 0:
+#        return 0
+#    if x%1 == 0:
+#        return int(x)
+#    elif x > 0:
+#        return int(round(x+0.5))
+#    elif x < 0:
+#        return int(round(x-0.5))
 
 
 #%%
@@ -104,7 +119,16 @@ class Grid:
             for s in range(self.spaltenlaenge): 
                 self.grid[z][s].zaehle3(ai, bi, aa, ba)
                 
-    def scan4(self, ai, bi, aa, ba, ausrichtung):
+    def scan4(self, ai, bi, wi, aa, ba, wa):
+        """ int ai, int bi, int wi, int aa, int ba, int wa -> void
+            lässt jede Zelle nach Aktivatoren/Inhibitoren in 
+            ihrer Umgebung zählen
+            Zu beachten: ai <= aa & bi <= ba """
+        for z in range(self.zeilenlaenge):
+            for s in range(self.spaltenlaenge): 
+                self.grid[z][s].zaehle4(ai, bi, wi, aa, ba, wa)                
+                
+    def scan5(self, ai, bi, aa, ba, ausrichtung):
         """ int ai, int bi, int aa, int ba, int ausrichtung -> void
             lässt jede Zelle nach Aktivatoren/Inhibitoren in 
             ihrer Umgebung zählen
@@ -121,7 +145,7 @@ class Grid:
                 self.grid[z][s].zaehle_async_halb(ai, bi, aa, ba, ausrichtung)
                 
                 
-    def scan5(self, ai, bi, wi, aa, ba, wa):
+    def scan6(self, ai, bi, wi, aa, ba, wa):
         """ int ai, int bi, int wi, int aa, int ba, int wa -> void
             lässt jede Zelle nach Aktivatoren/Inhibitoren in 
             ihrer Umgebung zählen
@@ -196,8 +220,8 @@ class Zelle:
         
         self.counter = 0
         r = radius
-        for z in range((-1)*r, r+1):
-            for s in range((-1)*r, r+1):            
+        for z in range(-r, r+1):
+            for s in range(-r, r+1):            
                 
                 if not(self.in_range(z,s)):                    
                     pass
@@ -216,8 +240,8 @@ class Zelle:
             basierend auf der Interpretation von Young; mit einem inneren 
             Radius für Aktivatoren und einem äußeren für Inhibitoren"""
         self.counter = 0
-        for z in range((-1)*ra, ra+1):
-            for s in range((-1)*ra, ra+1):
+        for z in range(-ra, ra+1):
+            for s in range(-ra, ra+1):
                 
                 if self.in_range(z,s) and (z**2 + s**2 <= ra**2):
                     temp = self.nachbar(z,s)
@@ -248,12 +272,11 @@ class Zelle:
             sind die Hauptachsen der äußeren Ellipse
             ai und aa liegen dabei auf der Horizontalen und bi und ba auf der
             Vertikalen.
-            Berechnungen gehen von der Formel (x/a)²+(y/b)²=1 aus.
-            """
-
+            Berechnungen gehen von der Formel (x/a)²+(y/b)²=1 aus."""
+            
         self.counter = 0
-        for y in range((-1)*ba, ba+1):        # y ist hierbei die Zeile
-            for x in range((-1)*aa, aa+1):    # x ist hierbei die Spalte
+        for y in range(-ba, ba+1):        # y ist hierbei die Zeile
+            for x in range(-aa, aa+1):    # x ist hierbei die Spalte
             
                 if self.in_range(y,x) and ((x/aa)**2 + (y/ba)**2 <= 1):
                     temp = self.nachbar(y,x)
@@ -267,6 +290,52 @@ class Zelle:
                     elif temp.activator and inside:
                         self.counter +=1
                         
+                        
+    def zaehle4(self, ai, bi, wi, aa, ba, wa):
+        """ int ai, int bi, int wi, int aa, int ba, int wa -> void
+
+            wi und wa sind die Größen der Winkel, um den die jeweilige 
+            Ellipse gegen den Uhrzeigersinn rotiert wurde. wa und wi sind im
+            Gradmaß anzugeben
+            
+            Zu beachten: ai <= aa & bi <= ba"""        
+        
+        self.counter = 0
+        
+        alpha = np.radians(wa) # Winkel der Rotation rad
+        cosalpha = np.cos(alpha)
+        sinalpha = np.sin(alpha)
+        
+        beta = np.radians(wi)
+        cosbeta = np.cos(beta)
+        sinbeta = np.sin(beta)
+        
+        for y in range(-ba, ba+1):            
+            for x in range(-aa, aa+1):
+                
+                if y <= bi and x <= ai:
+                    xd = x*cosbeta - y*sinbeta
+                    yd = x*sinbeta + y*cosbeta
+                    
+                    xr = runde(xd)                    
+                    yr = runde(yd)
+                    
+                    if self.in_range(yr, xr):
+                        if self.nachbar(yr, xr).activator:
+                            self.counter += 1
+                            
+                else:
+                    xd = x*cosalpha - y*sinalpha
+                    yd = x*sinalpha + y*cosalpha                        
+
+                    xr = runde(xd)                    
+                    yr = runde(yd)
+                    
+                    if self.in_range(yr, xr):
+                        if self.nachbar(yr, xr).activator:
+                            self.counter -= 1
+                
+        
 #%%
                         
     def zaehle_async_halb(self, ai, bi, aa, ba, ausrichtung):
@@ -340,9 +409,7 @@ class Zelle:
             Ellipse gegen den Uhrzeigersinn rotiert wurde. wa und wi sind im
             Gradmaß anzugeben
             
-            Zu beachten: ai <= aa & bi <= ba 
-            Wobei ein "echt weniger" bevorzugt ist, weil das Bild sonst einfach 
-            einfarbig wird. 
+            Zu beachten: ai <= aa & bi <= ba
             
             updated den derzeitigen Stand der umliegenden Aktivatoren 
             basierend auf der Interpretation von Young; bei der eine halbe

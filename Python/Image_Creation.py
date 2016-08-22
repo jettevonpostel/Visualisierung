@@ -71,8 +71,9 @@ if __name__ == "__main__":
     print("\n1: keine Aktivatoren, nur Werte")
     print("2: Mit Aktivatoren und Innen- und Außenradius (Kreis)") 
     print("3: Mit Aktivatoren und Innen- und Außenradius (Ellipse)")  
-    print("4: Mit Aktivatoren und Innen- und Außenradius (Halbe Ellipse)")
-    print("5: Mit Aktivatoren und Innen- und Außenradius (Rotierte Ellipsen)")    
+    print("4: Mit Aktivatoren und Innen- und Außenradius (Rotierte Rechtecke)")
+    print("5: Mit Aktivatoren und Innen- und Außenradius (Halbe Ellipse)")
+    print("6: Mit Aktivatoren und Innen- und Außenradius (Rotierte Ellipsen)")    
     
     while True:        
         modus = input("Modus: ") #    
@@ -97,6 +98,15 @@ if __name__ == "__main__":
             break
         
         if modus == 4:
+            ai = input("Horizontaler Innenradius: ")
+            bi = input("Vertikaler Innenradius: ")
+            wi = input("Winkel des Innenrechtecks: ")
+            aa = input("Horizontaler Außenradius: ")
+            ba = input("Vertikaler Außenradius: ")
+            wa = input("Winkel des Außenrechtecks: ")
+            break
+        
+        if modus == 5:
             ai = input("Horizontale Innenhauptachse: ")
             bi = input("Vertikale Innenhauptachse: ")
             aa = input("Horizontale Außenhauptachse: ")
@@ -104,7 +114,7 @@ if __name__ == "__main__":
             ausrichtung = input("Ausrichtung: ")
             break
         
-        if modus == 5:
+        if modus == 6:
             ai = input("Horizontale Innenhauptachse: ")
             bi = input("Vertikale Innenhauptachse: ")
             wi = input("Winkel der Innenellipse: ")
@@ -192,34 +202,9 @@ if __name__ == "__main__":
                     %(breite, hoehe, modus, chance, ai, bi, aa, ba) +\
                     ' Iteration %i.png' %i)
 
-#%%                  
-                    
-    elif modus == 4:
-        
-        path = path + '%i x %i Modus %i Chance %i Ai %i Bi %i Aa %i Ba %i ' \
-                %(breite, hoehe, modus, chance, ai, bi, aa, ba) +\
-                'Ausrichtung %i/' %ausrichtung
-                
-        create_path(path)
-        
-        im.putdata(convert2(g.grid, hoehe, breite))
-        im.save(path + '%i x %i Modus %i Chance %i Ai %i Bi %i Aa %i Ba %i ' \
-                %(breite, hoehe, modus, chance, ai, bi, aa, ba) +\
-                'Ausrichtung %i Startbild.png' %ausrichtung)         
-        
-        for i in range(iterationen):
-            g.scan4(ai, bi, aa, ba, ausrichtung)
-            g.write2()        
-            
-            im.putdata(convert2(g.grid, hoehe, breite))
-            im.save(path + \
-                    '%i x %i Modus %i Chance %i Ai %i Bi %i Aa %i Ba %i' \
-                    %(breite, hoehe, modus, chance, ai, bi, aa, ba) +\
-                    ' Ausrichtung %i Iteration %i.png' %(ausrichtung, i))
-                    
 #%%         
         
-    elif modus == 5:
+    elif modus == 4:
         
         path = path + '%i x %i Modus %i Chance %i Ai %i Bi %i Wi %i' \
                 %(breite, hoehe, modus, chance, ai, bi, wi) +\
@@ -233,7 +218,59 @@ if __name__ == "__main__":
                 'Aa %i Ba %i Wa %i Startbild.png' %(aa, ba, wa))
         
         for i in range(iterationen):
-            g.scan5(ai, bi, wi, aa, ba, wa)
+            g.scan4(ai, bi, wi, aa, ba, wa)
+            g.write2()        
+            
+            im.putdata(convert2(g.grid, hoehe, breite))
+            im.save(path + '%i x %i Modus %i Chance %i Ai %i Bi %i Wi %i' \
+                    %(breite, hoehe, modus, chance, ai, bi, wi) +\
+                    ' Aa %i Ba %i Wa %i Iteration %i.png' %(aa, ba, wa, i))
+
+
+#%%                  
+                    
+    elif modus == 5:
+        
+        path = path + '%i x %i Modus %i Chance %i Ai %i Bi %i Aa %i Ba %i ' \
+                %(breite, hoehe, modus, chance, ai, bi, aa, ba) +\
+                'Ausrichtung %i/' %ausrichtung
+                
+        create_path(path)
+        
+        im.putdata(convert2(g.grid, hoehe, breite))
+        im.save(path + '%i x %i Modus %i Chance %i Ai %i Bi %i Aa %i Ba %i ' \
+                %(breite, hoehe, modus, chance, ai, bi, aa, ba) +\
+                'Ausrichtung %i Startbild.png' %ausrichtung)         
+        
+        for i in range(iterationen):
+            g.scan5(ai, bi, aa, ba, ausrichtung)
+            g.write2()        
+            
+            im.putdata(convert2(g.grid, hoehe, breite))
+            im.save(path + \
+                    '%i x %i Modus %i Chance %i Ai %i Bi %i Aa %i Ba %i' \
+                    %(breite, hoehe, modus, chance, ai, bi, aa, ba) +\
+                    ' Ausrichtung %i Iteration %i.png' %(ausrichtung, i))
+  
+
+                  
+#%%         
+        
+    elif modus == 6:
+        
+        path = path + '%i x %i Modus %i Chance %i Ai %i Bi %i Wi %i' \
+                %(breite, hoehe, modus, chance, ai, bi, wi) +\
+                'Aa %i Ba %i Wa %i/' %(aa, ba, wa)
+                
+        create_path(path)
+        
+        im.putdata(convert2(g.grid, hoehe, breite))
+        im.save(path + '%i x %i Modus %i Chance %i Ai %i Bi %i Wi %i' \
+                %(breite, hoehe, modus, chance, ai, bi, wi) +\
+                'Aa %i Ba %i Wa %i Startbild.png' %(aa, ba, wa))
+        
+        for i in range(iterationen):
+            g.scan6(ai, bi, wi, aa, ba, wa)
             g.write2()        
             
             im.putdata(convert2(g.grid, hoehe, breite))

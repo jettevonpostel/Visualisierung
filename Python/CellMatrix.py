@@ -119,16 +119,25 @@ class Grid:
             for s in range(self.spaltenlaenge): 
                 self.grid[z][s].zaehle3(ai, bi, aa, ba)
                 
-    def scan4(self, ai, bi, wi, aa, ba, wa):
+    def scan4(self, ai, bi, aa, ba):
+        """ int ai, int bi, int aa, int ba -> void
+            lässt jede Zelle nach Aktivatoren/Inhibitoren in 
+            ihrer Umgebung zählen
+            Zu beachten: ai <= aa & bi <= ba """
+        for z in range(self.zeilenlaenge):
+            for s in range(self.spaltenlaenge): 
+                self.grid[z][s].zaehle4(ai, bi, aa, ba)
+                
+    def scan_async1(self, ai, bi, wi, aa, ba, wa):
         """ int ai, int bi, int wi, int aa, int ba, int wa -> void
             lässt jede Zelle nach Aktivatoren/Inhibitoren in 
             ihrer Umgebung zählen
             Zu beachten: ai <= aa & bi <= ba """
         for z in range(self.zeilenlaenge):
             for s in range(self.spaltenlaenge): 
-                self.grid[z][s].zaehle4(ai, bi, wi, aa, ba, wa)                
+                self.grid[z][s].zaehle_async1(ai, bi, wi, aa, ba, wa)                
                 
-    def scan5(self, ai, bi, aa, ba, ausrichtung):
+    def scan_async2(self, ai, bi, aa, ba, ausrichtung):
         """ int ai, int bi, int aa, int ba, int ausrichtung -> void
             lässt jede Zelle nach Aktivatoren/Inhibitoren in 
             ihrer Umgebung zählen
@@ -142,17 +151,17 @@ class Grid:
 
         for z in range(self.zeilenlaenge):
             for s in range(self.spaltenlaenge): 
-                self.grid[z][s].zaehle_async_halb(ai, bi, aa, ba, ausrichtung)
+                self.grid[z][s].zaehle_async2(ai, bi, aa, ba, ausrichtung)
                 
                 
-    def scan6(self, ai, bi, wi, aa, ba, wa):
+    def scan_async3(self, ai, bi, wi, aa, ba, wa):
         """ int ai, int bi, int wi, int aa, int ba, int wa -> void
             lässt jede Zelle nach Aktivatoren/Inhibitoren in 
             ihrer Umgebung zählen
             Zu beachten: ai <= aa & bi <= ba """
         for z in range(self.zeilenlaenge):
             for s in range(self.spaltenlaenge): 
-                self.grid[z][s].zaehle_async_twist(ai, bi, wi, aa, ba, wa)
+                self.grid[z][s].zaehle_async3(ai, bi, wi, aa, ba, wa)
                 
                 
     def write(self):
@@ -291,7 +300,27 @@ class Zelle:
                         self.counter +=1
                         
                         
-    def zaehle4(self, ai, bi, wi, aa, ba, wa):
+    def zaehle4(self, ai, bi, aa, ba):
+        """ int ai, int bi, int wi, int aa, int ba, int wa -> void"""
+        self.counter = 0
+        for z in range(-ba, ba+1):
+            for s in range(-aa, aa+1):
+            
+                if self.in_range(z,s):
+                    temp = self.nachbar(z,s)
+                    
+                    inside = (z <= bi) and (s <= ai) # true wenn sich
+                    # z und s innerhalb des Innenrechtecks befinden
+                    
+                    if temp.activator and not inside:
+                        self.counter -=1
+                        
+                    elif temp.activator and inside:
+                        self.counter +=1
+  
+#%%                      
+                        
+    def zaehle_async1(self, ai, bi, wi, aa, ba, wa):
         """ int ai, int bi, int wi, int aa, int ba, int wa -> void
 
             wi und wa sind die Größen der Winkel, um den die jeweilige 
@@ -338,7 +367,7 @@ class Zelle:
         
 #%%
                         
-    def zaehle_async_halb(self, ai, bi, aa, ba, ausrichtung):
+    def zaehle_async2(self, ai, bi, aa, ba, ausrichtung):
         """ int ai, int bi, int aa, int ba, int ausrichtung -> void
 
             Wahl der Ausrichtung: 1 => Hälfte zeigt nach oben        
@@ -402,7 +431,7 @@ class Zelle:
         
 #%%          
 
-    def zaehle_async_twist(self, ai, bi, wi, aa, ba, wa):
+    def zaehle_async3(self, ai, bi, wi, aa, ba, wa):
         """ int ai, int bi, int wi, int aa, int ba, int wa -> void
 
             wi und wa sind die Größen der Winkel, um den die jeweilige 

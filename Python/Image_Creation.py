@@ -24,6 +24,7 @@ def convert(matrix, zeilenlaenge, spaltenlaenge):
             temp.append(assign(matrix[z][s].wert))
     return temp
     
+    
 def convert2(matrix, zeilenlaenge, spaltenlaenge):
     """ int[][] -> (int r, int g, int b)[]
         Erstellt eine Tripelliste im rgb-Format aus einer 
@@ -52,6 +53,7 @@ def assign(wert):
 #    a = (wert+m)/(float(max_wert)*2)
 #    return (255*a, 0, 255*(1-a))
 
+
 def assign2(act):
     """ boolean act -> (int r, int g, int b)
         ordnet einem boolschen Wert einer bestimmenten Farbe im rgb-Fomat zu"""
@@ -70,34 +72,42 @@ if __name__ == "__main__":
                                # Aktivator ist? (also: 1/chance)
     print("\n1: keine Aktivatoren, nur Werte")
     print("2: Mit Aktivatoren und Innen- und Außenradius (Kreis)") 
-    print("3: Mit Aktivatoren und Innen- und Außenradius (Ellipse)")  
-    print("4: Mit Aktivatoren und Innen- und Außenradius (Rotierte Rechtecke)")
-    print("5: Mit Aktivatoren und Innen- und Außenradius (Halbe Ellipse)")
-    print("6: Mit Aktivatoren und Innen- und Außenradius (Rotierte Ellipsen)")    
+    print("3: Mit Aktivatoren und Innen- und Außenradius (Ellipse)")
+    print("4: Mit Aktivatoren und Innen- und Außenradius (Rechteck)")
+    print("a1: Mit Aktivatoren und Innen- und Außenradius (Rotierte Rechtecke)")
+    print("a2: Mit Aktivatoren und Innen- und Außenradius (Halbe Ellipse)")
+    print("a3: Mit Aktivatoren und Innen- und Außenradius (Rotierte Ellipsen)")    
     
     while True:        
-        modus = input("Modus: ") #    
+        modus = raw_input("Modus: ")    
         
-        if modus == 1:
+        if modus == "1":
             radius = input("Radius: ")
             # wie groß ist der Radius, wenn man ein einzelnes Quadrat betrachtet
             break            
             
-        if modus == 2:
+        if modus == "2":
             innenradius = input("Innenradius: ")
             # Innenradius, für doppelten Kreis
             aussenradius = input("Außenradius: ")      
             # Außenradius, für doppelten Kreis
             break
         
-        if modus == 3:
+        if modus == "3":
             ai = input("Horizontale Innenhauptachse: ")
             bi = input("Vertikale Innenhauptachse: ")
             aa = input("Horizontale Außenhauptachse: ")
             ba = input("Vertikale Außenhauptachse: ")
             break
+    
+        if modus == "4":
+            ai = input("Horizontale Innenseitenhälfte: ")
+            bi = input("Vertikale Innenseitenhälfte: ")
+            aa = input("Horizontale Außenseitenhälfte: ")
+            ba = input("Vertikale Außenseitenhälfte: ")
+            break        
         
-        if modus == 4:
+        if modus == "a1":
             ai = input("Horizontaler Innenradius: ")
             bi = input("Vertikaler Innenradius: ")
             wi = input("Winkel des Innenrechtecks: ")
@@ -106,7 +116,7 @@ if __name__ == "__main__":
             wa = input("Winkel des Außenrechtecks: ")
             break
         
-        if modus == 5:
+        if modus == "a2":
             ai = input("Horizontale Innenhauptachse: ")
             bi = input("Vertikale Innenhauptachse: ")
             aa = input("Horizontale Außenhauptachse: ")
@@ -114,7 +124,7 @@ if __name__ == "__main__":
             ausrichtung = input("Ausrichtung: ")
             break
         
-        if modus == 6:
+        if modus == "a3":
             ai = input("Horizontale Innenhauptachse: ")
             bi = input("Vertikale Innenhauptachse: ")
             wi = input("Winkel der Innenellipse: ")
@@ -134,15 +144,15 @@ if __name__ == "__main__":
 
 #%%
     
-    if modus == 1:
+    if modus == "1":
         
-        path = path + '%i x %i Modus %i Radius %i/' \
+        path = path + '%i x %i Modus %s Radius %i/' \
                %(breite, hoehe, modus, radius)
                
         create_path(path)
         
         im.putdata(convert(g.grid, hoehe, breite))
-        im.save(path + '%i x %i Modus %i Radius %i Startbild.png' \
+        im.save(path + '%i x %i Modus %s Radius %i Startbild.png' \
                 %(breite, hoehe, modus, radius))        
         
         for i in range(iterationen):
@@ -150,21 +160,21 @@ if __name__ == "__main__":
             g.write()        
             
             im.putdata(convert(g.grid, hoehe, breite))
-            im.save(path + '%i x %i Modus %i Iteration %i.png' \
+            im.save(path + '%i x %i Modus %s Iteration %i.png' \
                     %(breite, hoehe, modus, i))
                     
 #%%
                     
 
-    elif modus == 2:
+    elif modus == "2":
         
-        path = path + '%i x %i Modus %i Chance %i Ri %i Ra %i/' \
+        path = path + '%i x %i Modus %s Chance %i Ri %i Ra %i/' \
                 %(breite, hoehe, modus, chance, innenradius, aussenradius)
                 
         create_path(path)
     
         im.putdata(convert2(g.grid, hoehe, breite))
-        im.save(path + '%i x %i Modus %i Chance %i Ri %i Ra %i Startbild.png' \
+        im.save(path + '%i x %i Modus %s Chance %i Ri %i Ra %i Startbild.png' \
                 %(breite, hoehe, modus, chance, innenradius, aussenradius))         
         
         for i in range(iterationen):
@@ -173,22 +183,22 @@ if __name__ == "__main__":
             
             im.putdata(convert2(g.grid, hoehe, breite))
             im.save(path + \
-                    '%i x %i Modus %i Chance %i Ri %i Ra %i Iteration %i.png' \
+                    '%i x %i Modus %s Chance %i Ri %i Ra %i Iteration %i.png' \
                     %(breite, hoehe, modus, chance, innenradius, \
                       aussenradius, i)) 
                     
 #%%
                     
-    elif modus == 3:
+    elif modus == "3":
         
-        path = path + '%i x %i Modus %i Chance %i Ai %i Bi %i Aa %i Ba %i/' \
+        path = path + '%i x %i Modus %s Chance %i Ai %i Bi %i Aa %i Ba %i/' \
                 %(breite, hoehe, modus, chance, ai, bi, aa, ba)
                 
         create_path(path)
         
         im.putdata(convert2(g.grid, hoehe, breite))
         folder = ''
-        im.save(path + '%i x %i Modus %i Chance %i Ai %i Bi %i Aa %i Ba %i ' \
+        im.save(path + '%i x %i Modus %s Chance %i Ai %i Bi %i Aa %i Ba %i ' \
                 %(breite, hoehe, modus, chance, ai, bi, aa, ba) +\
                 'Startbild.png')         
         
@@ -198,57 +208,82 @@ if __name__ == "__main__":
             
             im.putdata(convert2(g.grid, hoehe, breite))
             im.save(path + \
-                    '%i x %i Modus %i Chance %i Ai %i Bi %i Aa %i Ba %i' \
+                    '%i x %i Modus %s Chance %i Ai %i Bi %i Aa %i Ba %i' \
+                    %(breite, hoehe, modus, chance, ai, bi, aa, ba) +\
+                    ' Iteration %i.png' %i)
+                    
+#%%
+                    
+    elif modus == "4":
+        
+        path = path + '%i x %i Modus %s Chance %i Ai %i Bi %i Aa %i Ba %i/' \
+                %(breite, hoehe, modus, chance, ai, bi, aa, ba)
+                
+        create_path(path)
+        
+        im.putdata(convert2(g.grid, hoehe, breite))
+        folder = ''
+        im.save(path + '%i x %i Modus %s Chance %i Ai %i Bi %i Aa %i Ba %i ' \
+                %(breite, hoehe, modus, chance, ai, bi, aa, ba) +\
+                'Startbild.png')         
+        
+        for i in range(iterationen):
+            g.scan4(ai, bi, aa, ba)
+            g.write2()        
+            
+            im.putdata(convert2(g.grid, hoehe, breite))
+            im.save(path + \
+                    '%i x %i Modus %s Chance %i Ai %i Bi %i Aa %i Ba %i' \
                     %(breite, hoehe, modus, chance, ai, bi, aa, ba) +\
                     ' Iteration %i.png' %i)
 
 #%%         
         
-    elif modus == 4:
+    elif modus == "a1":
         
-        path = path + '%i x %i Modus %i Chance %i Ai %i Bi %i Wi %i' \
+        path = path + '%i x %i Modus %s Chance %i Ai %i Bi %i Wi %i' \
                 %(breite, hoehe, modus, chance, ai, bi, wi) +\
                 'Aa %i Ba %i Wa %i/' %(aa, ba, wa)
                 
         create_path(path)
         
         im.putdata(convert2(g.grid, hoehe, breite))
-        im.save(path + '%i x %i Modus %i Chance %i Ai %i Bi %i Wi %i' \
+        im.save(path + '%i x %i Modus %s Chance %i Ai %i Bi %i Wi %i' \
                 %(breite, hoehe, modus, chance, ai, bi, wi) +\
                 'Aa %i Ba %i Wa %i Startbild.png' %(aa, ba, wa))
         
         for i in range(iterationen):
-            g.scan4(ai, bi, wi, aa, ba, wa)
+            g.scan_async1(ai, bi, wi, aa, ba, wa)
             g.write2()        
             
             im.putdata(convert2(g.grid, hoehe, breite))
-            im.save(path + '%i x %i Modus %i Chance %i Ai %i Bi %i Wi %i' \
+            im.save(path + '%i x %i Modus %s Chance %i Ai %i Bi %i Wi %i' \
                     %(breite, hoehe, modus, chance, ai, bi, wi) +\
                     ' Aa %i Ba %i Wa %i Iteration %i.png' %(aa, ba, wa, i))
 
 
 #%%                  
                     
-    elif modus == 5:
+    elif modus == "a2":
         
-        path = path + '%i x %i Modus %i Chance %i Ai %i Bi %i Aa %i Ba %i ' \
+        path = path + '%i x %i Modus %s Chance %i Ai %i Bi %i Aa %i Ba %i ' \
                 %(breite, hoehe, modus, chance, ai, bi, aa, ba) +\
                 'Ausrichtung %i/' %ausrichtung
                 
         create_path(path)
         
         im.putdata(convert2(g.grid, hoehe, breite))
-        im.save(path + '%i x %i Modus %i Chance %i Ai %i Bi %i Aa %i Ba %i ' \
+        im.save(path + '%i x %i Modus %s Chance %i Ai %i Bi %i Aa %i Ba %i ' \
                 %(breite, hoehe, modus, chance, ai, bi, aa, ba) +\
                 'Ausrichtung %i Startbild.png' %ausrichtung)         
         
         for i in range(iterationen):
-            g.scan5(ai, bi, aa, ba, ausrichtung)
+            g._async2(ai, bi, aa, ba, ausrichtung)
             g.write2()        
             
             im.putdata(convert2(g.grid, hoehe, breite))
             im.save(path + \
-                    '%i x %i Modus %i Chance %i Ai %i Bi %i Aa %i Ba %i' \
+                    '%i x %i Modus %s Chance %i Ai %i Bi %i Aa %i Ba %i' \
                     %(breite, hoehe, modus, chance, ai, bi, aa, ba) +\
                     ' Ausrichtung %i Iteration %i.png' %(ausrichtung, i))
   
@@ -256,25 +291,25 @@ if __name__ == "__main__":
                   
 #%%         
         
-    elif modus == 6:
+    elif modus == "a3":
         
-        path = path + '%i x %i Modus %i Chance %i Ai %i Bi %i Wi %i' \
+        path = path + '%i x %i Modus %s Chance %i Ai %i Bi %i Wi %i' \
                 %(breite, hoehe, modus, chance, ai, bi, wi) +\
                 'Aa %i Ba %i Wa %i/' %(aa, ba, wa)
                 
         create_path(path)
         
         im.putdata(convert2(g.grid, hoehe, breite))
-        im.save(path + '%i x %i Modus %i Chance %i Ai %i Bi %i Wi %i' \
+        im.save(path + '%i x %i Modus %s Chance %i Ai %i Bi %i Wi %i' \
                 %(breite, hoehe, modus, chance, ai, bi, wi) +\
                 'Aa %i Ba %i Wa %i Startbild.png' %(aa, ba, wa))
         
         for i in range(iterationen):
-            g.scan6(ai, bi, wi, aa, ba, wa)
+            g._async3(ai, bi, wi, aa, ba, wa)
             g.write2()        
             
             im.putdata(convert2(g.grid, hoehe, breite))
-            im.save(path + '%i x %i Modus %i Chance %i Ai %i Bi %i Wi %i' \
+            im.save(path + '%i x %i Modus %s Chance %i Ai %i Bi %i Wi %i' \
                     %(breite, hoehe, modus, chance, ai, bi, wi) +\
                     ' Aa %i Ba %i Wa %i Iteration %i.png' %(aa, ba, wa, i))
         

@@ -453,90 +453,40 @@ class Zelle:
         
         # Zunächst muss eine Box um die Ellipse zum Iterieren gefunden werden
         
-        beta = 180 - wa # Winkel zwischen Tangente und rotierter x-Achse
-        alpha = 90 - wa # Winkel zwischen rotierter Hauptachse und y-Achse       
-        beta = np.radians(beta)
-        alpha = np.radians(alpha)
-        
-        tanbeta =  np.tan(beta)        
-        
-        x0 = (aa**2 * tanbeta)/np.sqrt(ba**2 + aa**2 * tanbeta**2)  
-        # steigung der Tangente und beta sind gleichgesetzt 
-        # und dann nach x0 umgestellt
-        print "x0: ", x0
-            
-        wurzel = np.sqrt(1-(x0/aa)**2) # für Perfomance herausgezogen
-        print "wurzel: ", wurzel
-
-        f1 = ba*wurzel # Ellipsengleichung nach y umgestellt
-                       # dabei handelt es sich um die Obere Hälfte
-        print "f1: ", f1
-        
-        f2 = -ba*x0/(aa**2 * wurzel) # Ableitung erster Ordnung von f
-        print "f2: ", f2
-
-        xr= (f2*x0-f1)/f2 # Tangentengleichung (taylorraihe bis zur linearen 
-                          # Ordnung) mit 0 gleichgesetzt und nach x umgestellt
-        print "xr: ", xr
-
-        h = xr*np.sin(alpha) # h ist der höchste Punkt der gedrehten Ellipse
-                          # Berechnet mit Hilfe der entstehenden 
-                          # rechtwinkligen Dreiecke zwischen den Achsen
-        print "h: ", h
-        h = int(round(h)) # Wert wird zum nächsten Integer gerundet für die
-                          # nachfolgende range-function
-        print "h: ", h
-        
-        # Jetzt analog für die maximale breite
-        x0 = (aa**2 * tanbeta)/np.sqrt(ba**2 + aa**2 * tanbeta**2)         
-#        x0 = aa/np.sqrt((ba/(aa*np.tan(alpha)))**2 + 1)
-        print "\nx0: ", x0        
-        
-        wurzel = np.sqrt(1-(x0/aa)**2)
-        print "wurzel: ", wurzel
-        
-        f1 = ba*wurzel
-        print "f1: ", f1
-
-        f2 = -ba*x0/(aa**2 * wurzel)
-        print "f2: ", f2
-
-        xr = (f2*x0-f1)/f2
-        print "xr: ", xr
-
-        b = xr*np.cos(alpha)
-        print "b: ", b
-
-        b = int(round(b))
-        print "b: ", b
-
-        
         self.counter = 0
         
-        sinwa = np.sin(np.rad2deg(wa))
-        coswa = np.cos(np.rad2deg(wa))
-
-        sinwi = np.sin(np.rad2deg(wi))
-        coswi = np.cos(np.rad2deg(wi))
+        alpha = np.radians(wa) # Winkel der Rotation rad
+        cosalpha = np.cos(alpha)
+        sinalpha = np.sin(alpha)
         
-        for y in range(-h, h+1):        # y ist hierbei die Zeile
-            for x in range(-b, b+1):    # x ist hierbei die Spalte
-            
-                if self.in_range(y,x):
+        beta = np.radians(wi)
+        cosbeta = np.cos(beta)
+        sinbeta = np.sin(beta)
+        
+        for y in range(-ba, ba+1):            
+            for x in range(-aa, aa+1):
+                
+                if ((x/ai)**2 + (y/bi)**2 <= 1):
+                    xd = x*cosbeta - y*sinbeta
+                    yd = x*sinbeta + y*cosbeta
                     
-                    aussen = (((x*coswa-y*sinwa)/aa)**2 + \
-                             ((x*sinwa + y*coswa)/ba)**2) <= 1
-                             
-                    innen = (((x*coswi-y*sinwi)/ai)**2 + \
-                            ((x*sinwi + y*coswi)/bi)**2) <= 1
+                    xr = runde(xd)                    
+                    yr = runde(yd)
                     
-                    if aussen and not innen:
-                        if self.nachbar(y,x).activator:
-                            self.counter -= 1
-                    
-                    elif innen:
-                        if self.nachbar(y,x).activator:
+                    if self.in_range(yr, xr):
+                        if self.nachbar(yr, xr).activator:
                             self.counter += 1
+                            
+                elif ((x/aa)**2 + (y/ba)**2 <= 1):
+                    xd = x*cosalpha - y*sinalpha
+                    yd = x*sinalpha + y*cosalpha                        
+
+                    xr = runde(xd)                    
+                    yr = runde(yd)
+                    
+                    if self.in_range(yr, xr):
+                        if self.nachbar(yr, xr).activator:
+                            self.counter -= 1
         
 #%%  
         
@@ -545,7 +495,7 @@ class Zelle:
 #%%        
                 
                     
-    def max_update(self):
+    def max_update(self): #derzeit nicht benutzt
         """ int radius -> void
             Updated den Wert abhängig vom derzeitigen Counter und maximalen
             Aktivatorwert"""
@@ -554,10 +504,12 @@ class Zelle:
         else:
             self.wert = self.counter % max_wert
             
+            
     def update(self):
         """ void -> void
             Updated den Wert abhängig vom derzeitigen Counter"""
         self.wert = self.counter
+            
             
     def update2(self):
         """ void -> void
@@ -569,7 +521,6 @@ class Zelle:
                 self.activator = True
             elif self.wert < 0:
                 self.activator = False
-    
     
     
 #%%

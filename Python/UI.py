@@ -49,7 +49,7 @@ if rendermodus == 1:
     chance = input("Chance: ") # wie Hoch ist die Chance, dass eine Zelle ein
                                # Aktivator ist? (also: 1/chance)
     g = Grid(hoehe, breite, chance)
-    im= Image.new('RGB', (breite, hoehe))
+    im = Image.new('RGB', (breite, hoehe))
 
 
 if rendermodus == 2:

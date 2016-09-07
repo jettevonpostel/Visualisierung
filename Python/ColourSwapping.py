@@ -4,10 +4,18 @@ Created on Wed Aug 24 22:24:12 2016
 
 @author: Julien
 """
+# Diese Datei ist als kleines Skript gedacht, mit dem man einfach die Farbe 
+# innerhalb der Bilder austauschen kann
+
+#---------------------- -Imports und Hilfmethode ---------------------------
+
 from PIL import Image
 import Image_Creation as ic
 
 def adapting_path(path):
+    """ String path -> String
+        Diese Methode ermöglicht einfaches nutzen der Windows Datei und
+        tauscht alle \ durch /"""
     temp = list(path)
     i = 0
     for b in temp:
@@ -17,6 +25,13 @@ def adapting_path(path):
     return ''.join(temp)
     
 
+#----------------------------- Skriptbeginn ---------------------------------
+
+# je nach dem bei wie vielen Bildern man die Farbe wechseln möchte, bietet es
+# sich an einen Hardgecodeten Dateipfad zu verwenden, anstatt immer danach 
+# zu fragen
+# Gleiches gilt bei den Farben weiter unten im Skript
+ 
 #bildpfad = raw_input("Pfad: ")
 bildpfad = r'E:\Eigene Dateien\GitHub\Visualisierung\Python\Generierte Bilder\1920 x 1080 Modus 2 Chance 20 Ri 6 Ra 11'
 bildpfad = adapting_path(bildpfad)

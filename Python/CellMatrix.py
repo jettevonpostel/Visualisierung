@@ -33,15 +33,6 @@ def runde(x):
        liegende Stelle vom Ursprung aus gesehen"""
     return int(round(x))
 
-#    if x == 0:
-#        return 0
-#    if x%1 == 0:
-#        return int(x)
-#    elif x > 0:
-#        return int(round(x+0.5))
-#    elif x < 0:
-#        return int(round(x-0.5))
-
 
 #%%
 #=============================neue Klasse======================================
@@ -211,7 +202,8 @@ class Zelle:
         
     def in_range(self, zeile, spalte):
         """ int zeile, int spalte -> Boolean 
-            Gibt an, ob es eine Zelle relativ zu dieser gibt"""
+            Gibt an, ob es eine Zelle relativ zu dieser gibt,
+            die sich noch innerhalb des Grids befindet."""
         
         if self.spalte + spalte > self.grid.spaltenlaenge -1 or \
         self.spalte + spalte < 0 or \
@@ -224,8 +216,14 @@ class Zelle:
     
     def zaehle(self, radius):
         """ int radius -> void
-            updated den derzeitigen Stand der umliegenden Aktivatoren
-            in einem gegebenen Radius"""
+            updated den derzeitigen Stand der umliegenden Werte
+            in einem gegebenen Radius
+            Diese Methode wurde als erstes geschrieben, um das Konzept zu
+            erproben und um die Bildergenerierung zu testen.
+            
+            Es handelt sich hierbei nicht um das Young-Modell, es ist jedoch 
+            faszinierend, das dennoch ähnliche Muster enstehen.
+            Hauptsächlich Kuh-ähnliche Muster.s"""
         
         self.counter = 0
         r = radius
@@ -301,7 +299,8 @@ class Zelle:
                         
                         
     def zaehle4(self, ai, bi, aa, ba):
-        """ int ai, int bi, int wi, int aa, int ba, int wa -> void"""
+        """ int ai, int bi, int wi, int aa, int ba, int wa -> void
+            Nimmt als Rechtecke als Radien zur Betrachtung der Nachbarschaft"""
         self.counter = 0
         for z in range(-ba, ba+1):
             for s in range(-aa, aa+1):
@@ -529,7 +528,10 @@ class Zelle:
 #%%
     
 if __name__ == "__main__":
-    """Autmomatisierter Aufruf der Klassen. Vergleiche mit Java 'main'"""
+    """Autmomatisierter Aufruf der Klassen. Vergleiche mit Java 'main'
+       dieses kleine Testprogramm erstellt ein Gitter und gibt dieses dann in 
+       der Konsole aus.
+       Zum Testen der Methoden kann dieser Bereich erweitert werden."""
     g = Grid(7, 10, 12)
     g.print_grid2()
     print("\n")

@@ -14,29 +14,6 @@ import Image_Creation as ic
 import os
 
 
-#bilddatei = "1920 x 1080 Modus 3 Chance 15 Ai 8 Bi 4 Aa 8 Ba 14 Iteration 19.png"
-#aktiv_farbe = (255, 255, 255)
-#
-#
-#original = Image.open(bilddatei)
-#pix = original.load()
-#
-#hoehe = original.size[1]
-#breite = original.size[0]
-#
-#im= Image.new('RGB', original.size)
-#
-#g = Grid(hoehe, breite, 1)
-#
-#for z in range(hoehe):
-#    for s in range(breite):
-#        if pix[s, z] == aktiv_farbe:
-#            g.get_cell(z, s).activator = True
-#        else: 
-#            g.get_cell(z, s).activator = False
-#            
-#im.putdata(ic.convert2(g.grid, hoehe, breite))
-
 
 print("Rendermodus 1 = Neues Bild erstellen")
 print("Rendermodus 2 = Bild laden und weiter rendern")

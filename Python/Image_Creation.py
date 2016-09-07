@@ -16,7 +16,7 @@ def create_path(path):
 def convert(matrix, zeilenlaenge, spaltenlaenge):
     """ int[][] -> (int r, int g, int b)[]
         Erstellt eine Tripelliste im rgb-Format aus einer 
-        gegebenen Integermatrix"""
+        gegebenen Integermatrix anhand des Wertes"""
     temp = []
     for z in range(zeilenlaenge):
         for s in range(spaltenlaenge):
@@ -27,7 +27,7 @@ def convert(matrix, zeilenlaenge, spaltenlaenge):
 def convert2(matrix, zeilenlaenge, spaltenlaenge):
     """ int[][] -> (int r, int g, int b)[]
         Erstellt eine Tripelliste im rgb-Format aus einer 
-        gegebenen Integermatrix"""
+        gegebenen Integermatrix anhand der Akivatoren"""
     temp = []
     for z in range(zeilenlaenge):
         for s in range(spaltenlaenge):
